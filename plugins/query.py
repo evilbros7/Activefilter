@@ -333,6 +333,166 @@ async def cb_handler(client: Client, query: CallbackQuery):
             protect_content=True if ident == 'checksubp' else False
         )
 
+    elif callback_data == "report_yesterday":
+        # Calculate the start and end dates for yesterday
+        yesterday = date.today() - timedelta(days=1)
+        start_date = yesterday
+        end_date = yesterday
+
+        current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+        total_users = await db.daily_users_count(current_datetime)
+        total_chats = await db.daily_chats_count(current_datetime)
+
+        report = "Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        report += f"Users: {total_users}, Chats: {total_chats}\n"
+
+        # Send the report as a reply
+        await callback_query.answer(report)
+
+    elif callback_data == "report_last_7_days":
+        # Calculate the start and end dates for the past 7 days
+        today = date.today()
+        past_days = 7
+        start_date = today - timedelta(days=past_days-1)
+        end_date = today
+
+        report = "Last 7 Days' Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+
+        results_per_page = 7
+        page = 1
+        total_pages = (past_days + results_per_page - 1) // results_per_page
+
+        for i in range((page - 1) * results_per_page, min(page * results_per_page, past_days)):
+            current_date = start_date + timedelta(days=i)
+            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+            current_date_str = current_datetime.strftime('%d %B, %Y')
+            total_users = await db.daily_users_count(current_datetime)
+            total_chats = await db.daily_chats_count(current_datetime)
+            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+        # Add pagination buttons if there are more pages
+        if page < total_pages:
+            buttons.append([InlineKeyboardButton("Next Page", callback_data=f"report_last_7_days_{page+1}")])
+
+        # Add the buttons to the reply markup
+        reply_markup = InlineKeyboardMarkup(buttons)
+
+        # Send the report as a reply
+        await callback_query.answer(report, reply_markup=reply_markup)
+
+    elif callback_data.startswith("report_last_7_days_"):
+        # Extract the page number from the callback_data
+        page = int(callback_data.split("_")[-1])
+
+        # Calculate the start and end dates for the past 7 days
+        today = date.today()
+        past_days = 7
+        start_date = today - timedelta(days=past_days-1)
+        end_date = today
+
+        report = f"Last 7 Days' Report (Page {page}):\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+
+        results_per_page = 7
+        total_pages = (past_days + results_per_page - 1) // results_per_page
+
+        for i in range((page - 1) * results_per_page, min(page * results_per_page, past_days)):
+            current_date = start_date + timedelta(days=i)
+            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+            current_date_str = current_datetime.strftime('%d %B, %Y')
+            total_users = await db.daily_users_count(current_datetime)
+            total_chats = await db.daily_chats_count(current_datetime)
+            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+        # Add pagination buttons if there are more pages
+        if page < total_pages:
+            buttons.append([InlineKeyboardButton("Next Page", callback_data=f"report_last_7_days_{page+1}")])
+
+        # Add the buttons to the reply markup
+        reply_markup = InlineKeyboardMarkup(buttons)
+
+        # Send the report as a reply
+        await callback_query.answer(report, reply_markup=reply_markup)
+
+    elif callback_data == "report_last_30_days":
+        # Calculate the start and end dates for the past 30 days
+        today = date.today()
+        past_days = 30
+        start_date = today - timedelta(days=past_days-1)
+        end_date = today
+
+        report = "Last 30 Days' Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+
+        results_per_page = 7
+        page = 1
+        total_pages = (past_days + results_per_page - 1) // results_per_page
+
+        for i in range((page - 1) * results_per_page, min(page * results_per_page, past_days)):
+            current_date = start_date + timedelta(days=i)
+            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+            current_date_str = current_datetime.strftime('%d %B, %Y')
+            total_users = await db.daily_users_count(current_datetime)
+            total_chats = await db.daily_chats_count(current_datetime)
+            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+        # Add pagination buttons if there are more pages
+        if page < total_pages:
+            buttons.append([InlineKeyboardButton("Next Page", callback_data=f"report_last_30_days_{page+1}")])
+
+        # Add the buttons to the reply markup
+        reply_markup = InlineKeyboardMarkup(buttons)
+
+        # Send the report as a reply
+        await callback_query.answer(report, reply_markup=reply_markup)
+
+    elif callback_data.startswith("report_last_30_days_"):
+        # Extract the page number from the callback_data
+        page = int(callback_data.split("_")[-1])
+
+        # Calculate the start and end dates for the past 30 days
+        today = date.today()
+        past_days = 30
+        start_date = today - timedelta(days=past_days-1)
+        end_date = today
+
+        report = f"Last 30 Days' Report (Page {page}):\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+
+        results_per_page = 7
+        total_pages = (past_days + results_per_page - 1) // results_per_page
+
+        for i in range((page - 1) * results_per_page, min(page * results_per_page, past_days)):
+            current_date = start_date + timedelta(days=i)
+            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+            current_date_str = current_datetime.strftime('%d %B, %Y')
+            total_users = await db.daily_users_count(current_datetime)
+            total_chats = await db.daily_chats_count(current_datetime)
+            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+        # Add pagination buttons if there are more pages
+        if page < total_pages:
+            buttons.append([InlineKeyboardButton("Next Page", callback_data=f"report_last_30_days_{page+1}")])
+
+        # Add the buttons to the reply markup
+        reply_markup = InlineKeyboardMarkup(buttons)
+
+        # Send the report as a reply
+        await callback_query.answer(report, reply_markup=reply_markup)
+
+    elif callback_data == "report_this_year":
+        # Calculate the start and end dates for this year
+        today = date.today()
+        start_date = date(today.year, 1, 1)
+        end_date = today
+
+        report = "This Year's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+
+        current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+        total_users = await db.daily_users_count(current_datetime)
+        total_chats = await db.daily_chats_count(current_datetime)
+        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+        # Send the report as a reply
+        await callback_query.answer(report)
+        
 
     elif query.data == "removebg":
         await query.message.edit_text("**Select required mode**",
