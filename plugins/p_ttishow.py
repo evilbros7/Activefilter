@@ -267,40 +267,36 @@ async def list_chats(bot, message):
         await message.reply_document('chats.txt', caption="List Of Chats")
 
 
-@Client.on_message(filters.command("report") & filters.user(ADMINS))
+@Client.on_message(filters.command('report') & filters.user(ADMINS))
 async def get_report(client, message):
-    # Check if the command is sent in a private message
-    if message.chat.type == "private":
-        # Calculate the start and end dates for today
-        today = date.today()
-        start_date = today
-        end_date = today
+    # Calculate the start and end dates for today
+    today = date.today()
+    start_date = today
+    end_date = today
 
-        current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
-        total_users = await db.daily_users_count(current_datetime)
-        total_chats = await db.daily_chats_count(current_datetime)
+    current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+    total_users = await db.daily_users_count(current_datetime)
+    total_chats = await db.daily_chats_count(current_datetime)
 
-        report = "Today's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-        report += f"Users: {total_users}, Chats: {total_chats}\n"
+    report = "Today's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    report += f"Users: {total_users}, Chats: {total_chats}\n"
 
-        # Create buttons for different timeline options
-        buttons = [
-            [InlineKeyboardButton("Yesterday", callback_data="report_yesterday")],
-            [InlineKeyboardButton("Last 7 Days", callback_data="report_last_7_days")],
-            [InlineKeyboardButton("Last 30 Days", callback_data="report_last_30_days")],
-            [InlineKeyboardButton("This Year", callback_data="report_this_year")],
-            [InlineKeyboardButton("Cancel", callback_data="Cancel_report")],
-        ]
+    # Create buttons for different timeline options
+    buttons = [
+        [InlineKeyboardButton("Yesterday", callback_data="report_yesterday")],
+        [InlineKeyboardButton("Last 7 Days", callback_data="report_last_7_days")],
+        [InlineKeyboardButton("Last 30 Days", callback_data="report_last_30_days")],
+        [InlineKeyboardButton("This Year", callback_data="report_this_year")],
+        [InlineKeyboardButton("Cancel", callback_data="Cancel_report")],
+    ]
 
-        # Add the buttons to the reply markup
-        reply_markup = InlineKeyboardMarkup(buttons)
+    # Add the buttons to the reply markup
+    reply_markup = InlineKeyboardMarkup(buttons)
 
-        # Send the report with buttons as a reply
-        await message.reply(report, reply_markup=reply_markup)
+    # Send the report with buttons as a reply
+    await message.reply(report, reply_markup=reply_markup)
 
-    else:
-        # Handle group/channel reports differently or ignore them
-        pass
+
         
 
 
