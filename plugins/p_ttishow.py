@@ -268,7 +268,7 @@ async def list_chats(bot, message):
 
 
 @Client.on_message(filters.command('report') & filters.user(ADMINS))
-async def get_report(client, message):
+async def get_report(bot, message):
     # Calculate the start and end dates for today
     today = date.today()
     start_date = today
