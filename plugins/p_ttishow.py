@@ -269,32 +269,23 @@ async def list_chats(bot, message):
 
 @Client.on_message(filters.command("report") & filters.user(ADMINS))
 async def get_report(client, message):
-    # Calculate the start and end dates for today
+    # Calculate the start and end dates for the past 7 days
     today = date.today()
-    start_date = today
+    past_days = 7  # You can adjust the number of past days as per your requirement
+    start_date = today - timedelta(days=past_days-1)
     end_date = today
 
-    current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
-    total_users = await db.daily_users_count(current_datetime)
-    total_chats = await db.daily_chats_count(current_datetime)
+    report = "Report:\n\n"
 
-    report = "Today's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-    report += f"Users: {total_users}, Chats: {total_chats}\n"
+    for i in range(past_days):
+        current_date = start_date + timedelta(days=i)
+        current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+        current_date_str = current_datetime.strftime('%d %B, %Y')  # Convert current_date to string
+        total_users = await db.daily_users_count(current_datetime)
+        total_chats = await db.daily_chats_count(current_datetime)
+        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
-    # Create buttons for different timeline options
-    buttons = [
-        [InlineKeyboardButton("Yesterday", callback_data="report_yesterday")],
-        [InlineKeyboardButton("Last 7 Days", callback_data="report_last_7_days")],
-        [InlineKeyboardButton("Last 30 Days", callback_data="report_last_30_days")],
-        [InlineKeyboardButton("This Year", callback_data="report_this_year")],
-        [InlineKeyboardButton("Cancel", callback_data="Cancel_report")],
-    ]
-
-    # Add the buttons to the reply markup
-    reply_markup = InlineKeyboardMarkup(buttons)
-
-    # Send the report with buttons as a reply
-    await message.reply(report, reply_markup=reply_markup)
+    await message.reply(report)
 
 
         
