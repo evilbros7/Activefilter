@@ -7,7 +7,7 @@ from database.ia_filterdb import Media
 from utils import get_size, temp
 from Script import script
 from pyrogram.errors import ChatAdminRequired
-
+from datetime import date, datetime, timedelta
 
 @Client.on_message(filters.new_chat_members & filters.group)
 async def save_group(bot, message):
