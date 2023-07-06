@@ -152,22 +152,30 @@ these are the extra features of this bot
 <b>᚛› 𝚃𝙾𝚃𝙰𝙻 𝙲𝙷𝙰𝚃𝚂: <code>{}</code></b>
 <b>᚛› 𝚄𝚂𝙴𝙳 𝚂𝚃𝙾𝚁𝙰𝙶𝙴: <code>{}</code> 𝙼𝙱</b>
 <b>᚛› 𝙵𝚁𝙴𝙴 𝚂𝚃𝙾𝚁𝙰𝙶𝙴: <code>{}</code> 𝙼𝙱</b>"""
-    LOG_TEXT_G = """#𝐍𝐞𝐰𝐆𝐫𝐨𝐮𝐩
     
-<b>᚛› 𝐆𝐫𝐨𝐮𝐩 ⪼ {a}(<code>{b}</code>)</b>
-<b>᚛› 𝐆 𝐈𝐃 ⪼ @{c}
-<b>᚛› 𝐓𝐨𝐭𝐚𝐥 𝐌𝐞𝐦𝐛𝐞𝐫𝐬 ⪼ {d}</b>
-<b>᚛› 𝐀𝐝𝐝𝐞𝐝 𝐁𝐲 ⪼ {e}</b>
+    LOG_TEXT_G = """👥 #𝐍𝐞𝐰𝐆𝐫𝐨𝐮𝐩
 
-By {f}
-"""
-    LOG_TEXT_P = """#𝐍𝐞𝐰𝐔𝐬𝐞𝐫
+<b>᚛› Group: {a}</b>
+<b>᚛› Group ID: <code>{b}</code></b>
+<b>᚛› Group UN: @{c}</b>
+<b>᚛› Total Members: <code>{d}</code></b>
+<b>᚛› Total Groups: <code>{e}</code></b>
+<b>᚛› Today Groups: <code>{h}</code></b>
+<b>᚛› Date: <code>{f}</code></b>
+<b>᚛› Time: <code>{g}</code></b>
+<b>᚛› Added By: {j}</b>
+By {i}"""
+
+    LOG_TEXT_P = """👤 #𝐍𝐞𝐰𝐔𝐬𝐞𝐫
     
-<b>᚛› 𝐈𝐃 - <code>{}</code></b>
-<b>᚛› 𝐍𝐚𝐦𝐞 - {}</b>
-<b>᚛› 𝐔𝐍 - @{}</b>
-
-By @{} """
+ID: <code>{a}</code>
+Name: {b}
+Username: @{c}
+Total: {d}
+Date: <code>{e}</code>
+Time: <code>{f}</code>
+Today Users: {g}
+By @{h}"""
    
     ZOMBIES_TXT = """𝙷𝙴𝙻𝙿 𝚈𝙾𝚄 𝚃𝙾 𝙺𝙸𝙲𝙺 𝚄𝚂𝙴𝚁𝚂
 
