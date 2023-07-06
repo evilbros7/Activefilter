@@ -3,6 +3,8 @@ import logging
 import random
 import asyncio
 from Script import script
+from datetime import date, datetime
+import pytz
 from pyrogram import Client, filters, enums
 from pyrogram.errors import ChatAdminRequired, FloodWait
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -29,13 +31,46 @@ async def start(client, message):
         await message.reply(START_MESSAGE.format(user=message.from_user.mention if message.from_user else message.chat.title, bot=temp.B_LINK), reply_markup=InlineKeyboardMarkup(buttons), disable_web_page_preview=True)                    
         await asyncio.sleep(2) 
         if not await db.get_chat(message.chat.id):
-            total=await client.get_chat_members_count(message.chat.id)
-            await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(a=message.chat.title, b=message.chat.id, c=message.chat.username, d=total, f=temp.B_LINK, e="Unknown"))       
+            total = await client.get_chat_members_count(message.chat.id)
+            total_chat = await db.total_chat_count() + 1  # Increment total_chat by 1
+            tz = pytz.timezone('Asia/Kolkata')
+            now = datetime.now(tz)
+            time = now.strftime('%I:%M:%S %p')
+            today = now.date()  # Get the current date in the defined time zone
+            daily_chats = await db.daily_chats_count(today) + 1  # Increment daily_chats by 1
+            await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(
+                a=message.chat.title,
+                b=message.chat.id,
+                c=message.chat.username,
+                d=total,
+                e=total_chat,
+                f=str(today),
+                g=time,
+                h=daily_chats,
+                i=temp.B_LINK,
+                j="Unknown"
+            ))
             await db.add_chat(message.chat.id, message.chat.title, message.chat.username)
-        return 
+        return
+
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
-        await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention, message.from_user.username, temp.U_NAME))
+        total_users = await db.total_users_count() + 1  # Increment total_users by 1
+        tz = pytz.timezone('Asia/Kolkata')
+        now = datetime.now(tz)
+        time = now.strftime('%I:%M:%S %p')
+        today = now.date()  # Get the current date in the defined time zone
+        daily_chats = await db.daily_chats_count(today) + 1  # Increment daily_chats by 1
+        await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(
+            a=message.from_user.id,
+            b=message.from_user.mention,
+            c=message.from_user.username,
+            d=total_users,
+            e=str(today),
+            f=time,
+            g=daily_users,
+            h=temp.B_LINK
+        ))
     if len(message.command) != 2:
         buttons = [[
             InlineKeyboardButton("➕️ 𝙰𝙳𝙳 𝙼𝙴 𝚃𝙾 𝚈𝙾𝚄𝚁 𝙶𝚁𝙾𝚄𝙿 ➕️", url=f"http://t.me/{temp.U_NAME}?startgroup=true")
