@@ -60,7 +60,7 @@ async def start(client, message):
         now = datetime.now(tz)
         time = now.strftime('%I:%M:%S %p')
         today = now.date()  # Get the current date in the defined time zone
-        daily_chats = await db.daily_chats_count(today) + 1  # Increment daily_chats by 1
+        daily_users = await db.daily_users_count(today) + 1  # Increment daily_chats by 1
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(
             a=message.from_user.id,
             b=message.from_user.mention,
