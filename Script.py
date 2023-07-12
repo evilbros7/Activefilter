@@ -159,11 +159,11 @@ these are the extra features of this bot
 <b>᚛› Group ID: <code>{b}</code></b>
 <b>᚛› Group UN: @{c}</b>
 <b>᚛› Total Members: <code>{d}</code></b>
-<b>᚛› Total Groups: <code>{e}</code></b>
+<b>᚛› Total Groups: <code>{j}</code></b>
 <b>᚛› Today Groups: <code>{h}</code></b>
 <b>᚛› Date: <code>{f}</code></b>
 <b>᚛› Time: <code>{g}</code></b>
-<b>᚛› Added By: {j}</b>
+<b>᚛› Added By: {e}</b>
 By {i}"""
 
     LOG_TEXT_P = """👤 #𝐍𝐞𝐰𝐔𝐬𝐞𝐫
@@ -172,10 +172,10 @@ ID: <code>{a}</code>
 Name: {b}
 Username: @{c}
 Total: {d}
+Today Users: {g}
 Date: <code>{e}</code>
 Time: <code>{f}</code>
-Today Users: {g}
-By @{h}"""
+By {h}"""
    
     ZOMBIES_TXT = """𝙷𝙴𝙻𝙿 𝚈𝙾𝚄 𝚃𝙾 𝙺𝙸𝙲𝙺 𝚄𝚂𝙴𝚁𝚂
 
