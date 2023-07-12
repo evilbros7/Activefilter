@@ -43,12 +43,12 @@ async def start(client, message):
                 b=message.chat.id,
                 c=message.chat.username,
                 d=total,
-                e=total_chat,
+                e="Unknown",
                 f=str(today),
                 g=time,
                 h=daily_chats,
                 i=temp.B_LINK,
-                j="Unknown"
+                j="total_chat
             ))
             await db.add_chat(message.chat.id, message.chat.title, message.chat.username)
         return
