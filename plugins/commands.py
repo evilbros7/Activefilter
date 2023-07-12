@@ -55,12 +55,12 @@ async def start(client, message):
 
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
-        total_users = await db.total_users_count() + 1  # Increment total_users by 1
+        total_users = await db.total_users_count() # Increment total_users by 1
         tz = pytz.timezone('Asia/Kolkata')
         now = datetime.now(tz)
         time = now.strftime('%I:%M:%S %p')
         today = now.date()  # Get the current date in the defined time zone
-        daily_users = await db.daily_users_count(today) + 1  # Increment daily_chats by 1
+        daily_users = await db.daily_users_count(today) # Increment daily_chats by 1
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(
             a=message.from_user.id,
             b=message.from_user.mention,
