@@ -3,11 +3,11 @@
 PyLeaves==1.0.2
 
 #--Main----#
-git+https://github.com/MKN-BOTZ/pyrogram@master
-aiofiles==22.1.0
+git+https://github.com/MKN-BOTZ/pyrogram 
+aiofiles==22.1.0     
 tgcrypto==1.2.5
 requests
-beautifulsoup4==4.10.0  # Updated version
+bs4==0.0.1
 Flask==2.2.2
 gunicorn==20.1.0
 aiohttp==3.8.1
@@ -33,12 +33,17 @@ googletrans==3.1.0a0
 telegraph==2.2.0
 python-dotenv==0.21.1
 gTTS==2.3.1
-speedtest-cli==2.1.3  # Updated name and version
+speedtest==0.0.1
 humanize==4.6.0
 Pillow==9.4.0
 psutil==5.9.4
-numpy  # Latest version will be used
+dnspython==2.3.0
+NumPy
 wheel
 ujson
 wget
 pytz
+
+
+
+
