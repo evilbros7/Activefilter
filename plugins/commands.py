@@ -88,28 +88,52 @@ async def start(client, message):
             g=daily_users,
             h=temp.B_LINK
         ))
-    if len(message.command) != 2:
-        buttons = [[
-            InlineKeyboardButton("➕️ 𝙰𝙳𝙳 𝙼𝙴 𝚃𝙾 𝚈𝙾𝚄𝚁 𝙶𝚁𝙾𝚄𝙿 ➕️", url=f"http://t.me/{temp.U_NAME}?startgroup=true")
-            ],[
-            InlineKeyboardButton("🔍 𝚂𝙴𝙰𝚁𝙲𝙷 🔍", switch_inline_query_current_chat=''), 
-            InlineKeyboardButton("📢 𝚄𝙿𝙳𝙰𝚃𝙴𝚂 📢", url="https://t.me/iPapkornUpdate")
-            ],[      
-            InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="help"),
-            InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="about")
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await message.reply_chat_action(enums.ChatAction.TYPING)
-        m=await message.reply_sticker("CAACAgUAAxkBAAIFNGJSlfOErbkSeLt9SnOniU-58UUBAAKaAAPIlGQULGXh4VzvJWoeBA")
-        await asyncio.sleep(1)
-        await m.delete()
-        await message.reply_photo(
-            photo=random.choice(PICS),
-            caption=START_MESSAGE.format(user=message.from_user.mention, bot=temp.B_LINK),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        return
+    if len(message.command) != 2:            
+        if is_admin:
+            # If the user is an admin, show admin-specific buttons
+            admin_buttons = [[
+                InlineKeyboardButton("➕️ 𝙰𝙳𝙳 𝙼𝙴 𝚃𝙾 𝚈𝙾𝚄𝚁 𝙶𝚁𝙾𝚄𝙿 ➕️", url=f"http://t.me/{temp.U_NAME}?startgroup=true")
+                ],[
+                InlineKeyboardButton("🔍 𝚂𝙴𝙰𝚁𝙲𝙷 🔍", switch_inline_query_current_chat=''), 
+                InlineKeyboardButton("📊 𝚂𝚃𝙰𝚃𝚄𝚂 📊", callback_data="bot_status")
+                ],[      
+                InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="help"),
+                InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="about")
+                ],[
+                InlineKeyboardButton('🔒 𝙰𝙳𝙼𝙸𝙽 𝚂𝙴𝚃𝚃𝙸𝙽𝙶𝚂 🔒', callback_data='admin_settings')
+            ]]
+            reply_markup = InlineKeyboardMarkup(admin_buttons)
+            await message.reply_chat_action(enums.ChatAction.TYPING)
+            await asyncio.sleep(1)
+            await message.reply_photo(
+                photo=random.choice(PICS),
+                caption=START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
+            )
+        else:
+            # If the user is not an admin, show regular buttons
+            users_buttons = [
+                InlineKeyboardButton("➕️ 𝙰𝙳𝙳 𝙼𝙴 𝚃𝙾 𝚈𝙾𝚄𝚁 𝙶𝚁𝙾𝚄𝙿 ➕️", url=f"http://t.me/{temp.U_NAME}?startgroup=true")
+                ],[
+                InlineKeyboardButton("🔍 𝚂𝙴𝙰𝚁𝙲𝙷 🔍", switch_inline_query_current_chat=''), 
+                InlineKeyboardButton("📢 𝚄𝙿𝙳𝙰𝚃𝙴𝚂 📢", url="https://t.me/iPapkornUpdate")
+                ],[      
+                InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="help"),
+                InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="about")
+            ]]
+            reply_markup = InlineKeyboardMarkup(users_buttons)
+            await message.reply_chat_action(enums.ChatAction.TYPING)
+            m=await message.reply_sticker("CAACAgUAAxkBAAIFNGJSlfOErbkSeLt9SnOniU-58UUBAAKaAAPIlGQULGXh4VzvJWoeBA")
+            await asyncio.sleep(1)
+            await m.delete()
+            await message.reply_photo(
+                photo=random.choice(PICS),
+                caption=START_MESSAGE.format(user=message.from_user.mention, bot=temp.B_LINK),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
+            )
+            return
     if AUTH_CHANNEL and not await is_subscribed(client, message):
         try:
             invite_link = await client.create_chat_invite_link(int(AUTH_CHANNEL))
@@ -137,29 +161,53 @@ async def start(client, message):
             reply_markup=InlineKeyboardMarkup(btn),
             parse_mode=enums.ParseMode.DEFAULT
             )
-        return
+            return
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
-        buttons = [[
-            InlineKeyboardButton("➕️ 𝙰𝙳𝙳 𝙼𝙴 𝚃𝙾 𝚈𝙾𝚄𝚁 𝙶𝚁𝙾𝚄𝙿 ➕️", url=f"http://t.me/{temp.U_NAME}?startgroup=true")
-            ],[
-            InlineKeyboardButton("🔍 𝚂𝙴𝙰𝚁𝙲𝙷 🔍", switch_inline_query_current_chat=''), 
-            InlineKeyboardButton("📢 𝚄𝙿𝙳𝙰𝚃𝙴𝚂 📢", url="https://t.me/iPapkornUpdate")
-            ],[      
-            InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="help"),
-            InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="about")
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await message.reply_chat_action(enums.ChatAction.TYPING)
-        m=await message.reply_sticker("CAACAgUAAxkBAAIFNGJSlfOErbkSeLt9SnOniU-58UUBAAKaAAPIlGQULGXh4VzvJWoeBA")
-        await asyncio.sleep(1)
-        await m.delete()
-        await message.reply_photo(
-            photo=random.choice(PICS),
-            caption=START_MESSAGE.format(user=message.from_user.mention, bot=temp.B_LINK),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        return
+        if is_admin:
+            # If the user is an admin, show admin-specific buttons
+            admin_buttons = [[
+                InlineKeyboardButton("➕️ 𝙰𝙳𝙳 𝙼𝙴 𝚃𝙾 𝚈𝙾𝚄𝚁 𝙶𝚁𝙾𝚄𝙿 ➕️", url=f"http://t.me/{temp.U_NAME}?startgroup=true")
+                ],[
+                InlineKeyboardButton("🔍 𝚂𝙴𝙰𝚁𝙲𝙷 🔍", switch_inline_query_current_chat=''), 
+                InlineKeyboardButton("📊 𝚂𝚃𝙰𝚃𝚄𝚂 📊", callback_data="bot_status")
+                ],[      
+                InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="help"),
+                InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="about")
+                ],[
+                InlineKeyboardButton('🔒 𝙰𝙳𝙼𝙸𝙽 𝚂𝙴𝚃𝚃𝙸𝙽𝙶𝚂 🔒', callback_data='admin_settings')
+            ]]
+            reply_markup = InlineKeyboardMarkup(admin_buttons)
+            await message.reply_chat_action(enums.ChatAction.TYPING)
+            await asyncio.sleep(1)
+            await message.reply_photo(
+                photo=random.choice(PICS),
+                caption=START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
+            )
+        else:
+            # If the user is not an admin, show regular buttons
+            users_buttons = [
+                InlineKeyboardButton("➕️ 𝙰𝙳𝙳 𝙼𝙴 𝚃𝙾 𝚈𝙾𝚄𝚁 𝙶𝚁𝙾𝚄𝙿 ➕️", url=f"http://t.me/{temp.U_NAME}?startgroup=true")
+                ],[
+                InlineKeyboardButton("🔍 𝚂𝙴𝙰𝚁𝙲𝙷 🔍", switch_inline_query_current_chat=''), 
+                InlineKeyboardButton("📢 𝚄𝙿𝙳𝙰𝚃𝙴𝚂 📢", url="https://t.me/iPapkornUpdate")
+                ],[      
+                InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="help"),
+                InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="about")
+            ]]
+            reply_markup = InlineKeyboardMarkup(users_buttons)
+            await message.reply_chat_action(enums.ChatAction.TYPING)
+            m=await message.reply_sticker("CAACAgUAAxkBAAIFNGJSlfOErbkSeLt9SnOniU-58UUBAAKaAAPIlGQULGXh4VzvJWoeBA")
+            await asyncio.sleep(1)
+            await m.delete()
+            await message.reply_photo(
+                photo=random.choice(PICS),
+                caption=START_MESSAGE.format(user=message.from_user.mention, bot=temp.B_LINK),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
+            )
+            return
     data = message.command[1]
     try:
         pre, file_id = data.split('_', 1)
@@ -411,7 +459,237 @@ async def delete_all_index_confirm(bot, message):
     await message.answer('Piracy Is Crime')
     await message.message.edit('Succesfully Deleted All The Indexed Files.')
 
+@Client.on_message(filters.command('findfiles') & filters.user(ADMINS))
+async def find_files(client, message):
+    """Find files in the database based on search criteria"""
+    search_query = " ".join(message.command[1:])  # Extract the search query from the command
 
+    if not search_query:
+        return await message.reply('✨ Please provide a name.\n\nExample: /findfiles Kantara.', quote=True)
+
+    # Build the MongoDB query to search for files
+    query = {
+        'file_name': {"$regex": f".*{re.escape(search_query)}.*", "$options": "i"}
+    }
+
+    # Fetch the matching files from the database
+    results = await Media.collection.find(query).to_list(length=None)
+
+    if len(results) > 0:
+        confirmation_message = f'✨ {len(results)} files found matching the search query "{search_query}" in the database:\n\n'
+        starting_query = {
+            'file_name': {"$regex": f"^{re.escape(search_query)}", "$options": "i"}
+        }
+        starting_results = await Media.collection.find(starting_query).to_list(length=None)
+        confirmation_message += f'✨ {len(starting_results)} files found starting with "{search_query}" in the database.\n\n'
+        confirmation_message += '✨ Please select the option for easier searching:'
+        
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🌟 Find Related Name Files", callback_data=f"related_files:1:{search_query}")
+                ],
+                [
+                    InlineKeyboardButton("🌟 Find Starting Name Files", callback_data=f"starting_files:1:{search_query}")
+                ],
+                [
+                    InlineKeyboardButton("❌ Cancel", callback_data="cancel")
+                ]
+            ]
+        )
+
+        await message.reply_text(confirmation_message, reply_markup=keyboard)
+    else:
+        await message.reply_text(f'😎 No files found matching the search query "{search_query}" in the database')
+
+@Client.on_callback_query(filters.regex('^related_files'))
+async def find_related_files(client, callback_query):
+    data = callback_query.data.split(":")
+    page = int(data[1])
+    search_query = data[2]
+    query = {
+        'file_name': {"$regex": f".*{re.escape(search_query)}.*", "$options": "i"}
+    }
+    results = await Media.collection.find(query).to_list(length=None)
+
+    total_results = len(results)
+    num_pages = total_results // RESULTS_PER_PAGE + 1
+
+    start_index = (page - 1) * RESULTS_PER_PAGE
+    end_index = start_index + RESULTS_PER_PAGE
+    current_results = results[start_index:end_index]
+
+    result_message = f'{len(current_results)} files found with related names to "{search_query}" in the database:\n\n'
+    for result in current_results:
+        result_message += f'File Name: {result["file_name"]}\n'
+        result_message += f'File Size: {result["file_size"]}\n\n'
+
+    buttons = []
+
+    if page > 1:
+        buttons.append(InlineKeyboardButton("⬅️ Back", callback_data=f"related_files:{page-1}:{search_query}"))
+
+    if page < num_pages:
+        buttons.append(InlineKeyboardButton("Next ➡️", callback_data=f"related_files:{page+1}:{search_query}"))
+
+    buttons.append(InlineKeyboardButton("🔚 Cancel", callback_data=f"cancel_find"))
+
+    # Create button groups with two buttons each
+    button_groups = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
+    keyboard = InlineKeyboardMarkup(button_groups)
+
+    await callback_query.message.edit_text(result_message, reply_markup=keyboard)
+    await callback_query.answer()
+
+@Client.on_callback_query(filters.regex('^starting_files'))
+async def find_starting_files(client, callback_query):
+    data = callback_query.data.split(":")
+    page = int(data[1])
+    search_query = data[2]
+    query = {
+        'file_name': {"$regex": f"^{re.escape(search_query)}", "$options": "i"}
+    }
+    results = await Media.collection.find(query).to_list(length=None)
+
+    total_results = len(results)
+    num_pages = total_results // RESULTS_PER_PAGE + 1
+
+    start_index = (page - 1) * RESULTS_PER_PAGE
+    end_index = start_index + RESULTS_PER_PAGE
+    current_results = results[start_index:end_index]
+
+    result_message = f'{len(current_results)} files found with names starting "{search_query}" in the database:\n\n'
+    for result in current_results:
+        result_message += f'File Name: {result["file_name"]}\n'
+        result_message += f'File Size: {result["file_size"]}\n\n'
+
+    buttons = []
+
+    if page > 1:
+        buttons.append(InlineKeyboardButton("⬅️ Back", callback_data=f"related_files:{page-1}:{search_query}"))
+
+    if page < num_pages:
+        buttons.append(InlineKeyboardButton("Next ➡️", callback_data=f"related_files:{page+1}:{search_query}"))
+
+    buttons.append(InlineKeyboardButton("🔚 Cancel", callback_data=f"cancel_find"))
+
+    # Create button groups with two buttons each
+    button_groups = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
+    keyboard = InlineKeyboardMarkup(button_groups)
+
+    await callback_query.message.edit_text(result_message, reply_markup=keyboard)
+    await callback_query.answer()
+
+
+@Client.on_message(filters.command("findzip") & filters.user(ADMINS))
+async def find_zip_command(bot, message):
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("List", callback_data="findzip_list_1"),
+                InlineKeyboardButton("Delete", callback_data="findzip_delete_confirm"),
+            ],
+            [
+                InlineKeyboardButton("Cancel", callback_data="findzip_cancel"),
+            ]
+        ]
+    )
+
+    await message.reply_text(
+        "🔍 Select an action for the ZIP files:\n\n"
+        "• 'List': Show the list of ZIP files found in the database.\n"
+        "• 'Delete': Confirm and delete the ZIP files from the database.\n"
+        "• 'Cancel': Cancel the process.",
+        reply_markup=keyboard,
+        quote=True
+    )
+
+
+@Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^findzip_list_(\d+)$"))
+async def find_zip_list_callback(bot, callback_query):
+    page_num = int(callback_query.data.split("_")[2])
+    per_page = 10  # Number of files per page
+
+    files = []
+    async for media in Media.find():
+        if media.file_type == "document" and media.file_name.endswith(".zip"):
+            files.append(media)
+
+    total_files = len(files)
+    total_pages = (total_files + per_page - 1) // per_page
+
+    start_index = (page_num - 1) * per_page
+    end_index = start_index + per_page
+
+    file_list = ""
+    for file in files[start_index:end_index]:
+        file_name = file.file_name
+        file_size_mb = round(file.file_size / (1024 * 1024), 2)
+        file_list += f"• {file_name} ({file_size_mb} MB)\n"
+
+    if file_list:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("Back", callback_data=f"findzip_list_{page_num - 1}"),
+                    InlineKeyboardButton("Next", callback_data=f"findzip_list_{page_num + 1}"),
+                ]
+            ]
+        )
+
+        text = f"📋 Found {total_files} ZIP files in the database:\n\n{file_list}"
+        if page_num < total_pages:
+            text += "\n\nUse 'Next' button to view the next page."
+
+        await callback_query.message.edit_text(text, reply_markup=keyboard)
+    else:
+        await callback_query.message.edit_text("❎ No ZIP files found in the database.")
+
+
+@Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^findzip_delete_confirm$"))
+async def find_zip_delete_callback(bot, callback_query):
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("Yes", callback_data="findzip_delete_yes"),
+                InlineKeyboardButton("Back", callback_data="findzip_list_1"),
+            ]
+        ]
+    )
+
+    files = []
+    async for media in Media.find():
+        if media.file_type == "document" and media.file_name.endswith(".zip"):
+            files.append(media)
+
+    total_files = len(files)
+
+    await callback_query.message.edit_text(
+        f"⚠️ Are you sure you want to delete {total_files} ZIP files from the database?\n\n"
+        "• 'Yes': Confirm and delete the files.\n"
+        "• 'Back': Go back to the list.",
+        reply_markup=keyboard
+    )
+
+@Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^findzip_delete_yes$"))
+async def find_zip_delete_confirm_callback(bot, callback_query):
+    deleted_files = []
+    async for media in Media.find():
+        if media.file_type == "document" and media.file_name.endswith(".zip"):
+            deleted_files.append(media)
+            await media.delete()
+
+    total_files = len(deleted_files)
+
+    await callback_query.message.edit_text(
+        f"🗑️ {total_files} ZIP files have been successfully deleted from the database."
+    )
+
+@Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^findzip_cancel$"))
+async def find_zip_cancel_callback(bot, callback_query):
+    await callback_query.message.edit_text("❌ Process canceled.")
+    await callback_query.answer()
+    
 @Client.on_message(filters.command('settings'))
 async def settings(client, message):
     userid = message.from_user.id if message.from_user else None
