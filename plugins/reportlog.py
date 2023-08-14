@@ -3,15 +3,14 @@ from pyrogram.types import Message
 import datetime
 import asyncio
 from database.users_chats_db import db
-from bot import app  # Import the 'app' instance from bot.py
-
+ 
 from info import ADMINS, LOG_CHANNEL
 
 # Dictionary to store users' set log times
 user_log_times = {}
 
 # Command handler for setting log time
-@app.on_message(filters.command("setlogtime") & filters.user(ADMINS))
+@Client.on_message(filters.command("setlogtime") & filters.user(ADMINS))
 async def set_log_time(_, message: Message):  # Change 'client' to '_' to ignore the unused parameter
     try:
         chat_id = message.chat.id
@@ -43,12 +42,12 @@ async def send_log():
             if current_time.hour == log_time[0] and current_time.minute == log_time[1]:
                 # Replace with your logic to fetch and format the log
                 log_text = f"Log Send...\nDate/Time: {current_time}\nTotal Users: {total_users}\nTotal Chats: {total_chat}"
-                await app.send_message(LOG_CHANNEL, log_text)  # Use 'app' instead of 'bot'
+                await bot.send_message(LOG_CHANNEL, log_text)  # Use 'app' instead of 'bot'
 
         await asyncio.sleep(60)  # Check every minute
 
 # Start the log sending loop
-@app.on_startup
+@Client.on_startup
 async def start_log_sender(_):
     await asyncio.create_task(send_log())
     
