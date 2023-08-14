@@ -28,12 +28,6 @@ Free Space: <code>{free}</code> """
     msg = await bot.send_message(chat_id=update.chat.id, text="__Processing...__", parse_mode=enums.ParseMode.MARKDOWN)         
     await msg.edit_text(text=ms_g, parse_mode=enums.ParseMode.HTML)
    
-@Client.on_message(filters.command('logs') & filters.user(ADMINS))
-async def log_file(bot, message):
-    try:
-        await message.reply_document('BotLog.txt')
-    except Exception as e:
-        await message.reply(str(e))
 
 
 @Client.on_message(filters.command("restart") & filters.user(ADMINS))
