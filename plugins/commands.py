@@ -7,7 +7,7 @@ from datetime import date, datetime
 import pytz
 from pyrogram import Client, filters, enums
 from pyrogram.errors import ChatAdminRequired, FloodWait
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from database.ia_filterdb import Media, get_file_details, unpack_new_file_id
 from database.users_chats_db import db
 from info import CHANNELS, ADMINS, AUTH_CHANNEL, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, START_MESSAGE, FORCE_SUB_TEXT, SUPPORT_CHAT
@@ -690,6 +690,378 @@ async def find_zip_cancel_callback(bot, callback_query):
     await callback_query.message.edit_text("❌ Process canceled.")
     await callback_query.answer()
     
+@Client.on_message(filters.command("deletefiletype") & filters.user(ADMINS))
+async def delete_file_type_command(client, message):
+    """Command handler for deleting files of a specific type from the database"""
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("📥 Document", callback_data="delete_filetype_document"),
+                InlineKeyboardButton("🎬 Video", callback_data="delete_filetype_video"),
+            ],
+            [
+                InlineKeyboardButton("🎧 Audio", callback_data="delete_filetype_audio"),
+                InlineKeyboardButton("📦 Zip", callback_data="delete_filetype_zip"),
+            ],
+            [
+                InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+            ]
+        ]
+    )
+
+    await message.reply_text("🗑 Select the type of files you want to delete!\n\n🗑 This will delete related files from the database:",
+        reply_markup=keyboard,
+        quote=True,
+    )
+
+@Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^delete_filetype_(document|video|audio)$"))
+async def delete_file_type_callback(client, callback_query):
+    """Callback handler for deleting files of a specific type"""
+    file_type = callback_query.data.replace("delete_filetype_", "")
+
+    total_files = await Media.count_documents({"file_type": file_type})
+
+    if total_files > 0:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🗑 Delete", callback_data=f"confirm_delete_{file_type}"),
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                ]
+            ]
+        )
+
+        await callback_query.edit_message_text(f"✅ Found {total_files} {file_type}(s) in the database.\n\n""Please select an action:",
+            reply_markup=keyboard,
+        )
+    else:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                    InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                ]
+            ]
+        )
+
+        await callback_query.edit_message_text(f"No {file_type}s found in the database.",
+            reply_markup=keyboard,
+        )
+
+@Client.on_callback_query(filters.regex("delete_filetype_zip"))
+async def delete_file_type_zip_callback(bot, callback_query):
+    files, total = await get_bad_files('zip')
+    if total > 0:
+        confirm_btns = [
+            [
+                InlineKeyboardButton(f"🗑 Delete ({total} files)", callback_data="confirm_delete_zip"),
+                InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+            ]
+        ]
+        await callback_query.edit_message_text(
+            f"✅ Found {total} zip file(s) in the database.\n\nPlease select an action:",
+            reply_markup=InlineKeyboardMarkup(confirm_btns),
+        )
+    else:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                    InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                ]
+            ]
+        )
+
+        await callback_query.edit_message_text(
+            "No zip files found in the database.",
+            reply_markup=keyboard,
+        )
+        
+@Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^confirm_delete_document$"))
+async def confirm_delete_document_callback(bot, callback_query):
+    """Callback handler for confirming the deletion of document files"""
+    result = await Media.collection.delete_many({"file_type": "document"})
+
+    if result.deleted_count:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                    InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                ]
+            ]
+        )
+
+        await callback_query.message.edit_text("🗑 All document files have been successfully deleted from the database.",
+            reply_markup=keyboard,
+        )
+    else:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                    InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                ]
+            ]
+        )
+
+        await callback_query.message.edit_text("❎ No document files found in the database.",
+            reply_markup=keyboard,
+        )
+
+@Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^confirm_delete_video$"))
+async def confirm_delete_video_callback(bot, callback_query):
+    """Callback handler for confirming the deletion of video files"""
+    result = await Media.collection.delete_many({"file_type": "video"})
+
+    if result.deleted_count:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                    InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                ]
+            ]
+        )
+
+        await callback_query.message.edit_text("🗑 All video files have been successfully deleted from the database.",
+            reply_markup=keyboard,
+        )
+    else:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                    InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                ]
+            ]
+        )
+
+        await callback_query.message.edit_text("🗑 No video files found in the database.",
+            reply_markup=keyboard,
+        )
+
+@Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^confirm_delete_audio$"))
+async def confirm_delete_audio_callback(bot, callback_query):
+    """Callback handler for confirming the deletion of audio files"""
+    result = await Media.collection.delete_many({"file_type": "audio"})
+
+    if result.deleted_count:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                    InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                ]
+            ]
+        )
+
+        await callback_query.message.edit_text("🗑 All audio files have been successfully deleted from the database.",
+            reply_markup=keyboard,
+        )
+    else:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                    InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                ]
+            ]
+        )
+
+        await callback_query.message.edit_text("❎ No audio files found in the database.",
+            reply_markup=keyboard,
+        )
+
+@Client.on_callback_query(filters.regex("confirm_delete_zip"))
+async def confirm_delete_zip_callback(bot, callback_query):
+    files, total = await get_bad_files('zip')
+    deleted = 0
+    for file in files:
+        file_ids = file.file_id
+        result = await Media.collection.delete_one({'_id': file_ids})
+        if result.deleted_count:
+            logger.info(f'Zip file Found! Successfully deleted from the database.')
+        deleted += 1
+    deleted = str(deleted)
+    await callback_query.message.edit_text(
+        f"<b>Successfully deleted {deleted} zip file(s).</b>",
+    )
+
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+            ]
+        ]
+    )
+
+    await callback_query.message.edit_text(
+        "🗑 All zip files have been successfully deleted from the database.",
+        reply_markup=keyboard,
+    )
+    
+@Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^dft_cancel$"))
+async def delete_file_type_cancel_callback(bot, callback_query):
+    """Callback handler for canceling the delete file type operation"""
+    await callback_query.message.edit_text("Delete file type operation canceled.")
+    await callback_query.answer()
+    
+    
+@Client.on_message(filters.command('deletefiles') & filters.user("ADMINS"))
+async def delete_files(client, message):
+    if len(message.command) == 1:
+        await message.reply_text("🤨 Please provide a file name to delete.\n\nExample: /deletename Kantara")
+        return
+
+    file_name = message.command[1].strip()
+
+    result = await Media.collection.count_documents({
+        'file_name': {"$regex": f".*{re.escape(file_name)}.*", "$options": "i"}
+    })
+
+    if result > 0:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🌟 Delete all related name files", callback_data=f"confirm_delete_related:{file_name}")
+                ],
+                [
+                    InlineKeyboardButton("🌟 Delete all starting name files", callback_data=f"confirm_delete_starting:{file_name}")
+                ],
+                [
+                    InlineKeyboardButton("🔚 Cancel", callback_data="cancel_delete")
+                ]
+            ]
+        )
+
+        confirmation_message = f'✨ {result} files found with the name "{file_name}" in the database.\n\n'
+        starting_result = await Media.collection.count_documents({
+            'file_name': {"$regex": f"^{re.escape(file_name)}", "$options": "i"}
+        })
+        confirmation_message += f'✨ {starting_result} files found with names starting "{file_name}" in the database.\n\n'
+        confirmation_message += '✨ Please select the deletion option:'
+
+        await message.reply_text(confirmation_message, reply_markup=keyboard)
+    else:
+        await message.reply_text(f'😎 No files found with the name "{file_name}" in the database')
+
+@Client.on_callback_query(filters.regex('^confirm_delete_related'))
+async def confirm_delete_related_files(client, callback_query):
+    file_name = callback_query.data.split(":", 1)[1]
+    confirmation_message = f'⚠️ Are you sure you want to delete all files with the name "{file_name}"?\n\n' \
+                           f'This action cannot be undone.'
+
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("✅ Yes", callback_data=f"delete_related:{file_name}"),
+                InlineKeyboardButton("🏠 Home", callback_data="deletename")
+            ],
+            [
+                InlineKeyboardButton("🔚 Cancel", callback_data="cancel_delete")
+            ]
+        ]
+    )
+
+    await callback_query.message.edit_text(confirmation_message, reply_markup=keyboard)
+
+
+@Client.on_callback_query(filters.regex('^confirm_delete_starting'))
+async def confirm_delete_starting_files(client, callback_query):
+    file_name = callback_query.data.split(":", 1)[1]
+    confirmation_message = f'⚠️ Are you sure you want to delete all files with names starting "{file_name}"?\n\n' \
+                           f'This action cannot be undone.'
+
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("✅ Yes", callback_data=f"delete_starting:{file_name}"),
+                InlineKeyboardButton("🏠 Home", callback_data="deletename")
+            ],
+            [
+                InlineKeyboardButton("🔚 Cancel", callback_data="cancel_delete")
+            ]
+        ]
+    )
+
+    await callback_query.message.edit_text(confirmation_message, reply_markup=keyboard)
+
+
+@Client.on_callback_query(filters.regex('^delete_related'))
+async def delete_related_files(client, callback_query):
+    file_name = callback_query.data.split(":", 1)[1]
+    result = await Media.collection.delete_many({
+        'file_name': {"$regex": f".*{re.escape(file_name)}.*", "$options": "i"}
+    })
+
+    if result.deleted_count:
+        message_text = f"✅ Deleted {result.deleted_count} files."
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletename"),
+                    InlineKeyboardButton("⬅️ Back", callback_data=f"confirm_delete_related:{file_name}")
+                ],
+                [
+                    InlineKeyboardButton("🔚 Cancel", callback_data="cancel_delete")
+                ]
+            ]
+        )
+    else:
+        message_text = "❌ Deletion failed. No files deleted."
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletename"),
+                    InlineKeyboardButton("⬅️ Back", callback_data=f"confirm_delete_related:{file_name}")
+                ],
+                [
+                    InlineKeyboardButton("🔚 Cancel", callback_data="cancel_delete")
+                ]
+            ]
+        )
+
+    await callback_query.message.edit_text(message_text, reply_markup=keyboard)
+
+
+@Client.on_callback_query(filters.regex('^delete_starting'))
+async def delete_starting_files(client, callback_query):
+    file_name = callback_query.data.split(":", 1)[1]
+    result = await Media.collection.delete_many({
+        'file_name': {"$regex": f"^{re.escape(file_name)}", "$options": "i"}
+    })
+
+    if result.deleted_count:
+        message_text = f"✅ Deleted {result.deleted_count} files."
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletename"),
+                    InlineKeyboardButton("⬅️ Back", callback_data=f"confirm_delete_starting:{file_name}")
+                ],
+                [
+                    InlineKeyboardButton("🔚 Cancel", callback_data="cancel_delete")
+                ]
+            ]
+        )
+    else:
+        message_text = "❌ Deletion failed. No files deleted."
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletename"),
+                    InlineKeyboardButton("⬅️ Back", callback_data=f"confirm_delete_starting:{file_name}")
+                ],
+                [
+                    InlineKeyboardButton("🔚 Cancel", callback_data="cancel_delete")
+                ]
+            ]
+        )
+
+    await callback_query.message.edit_text(message_text, reply_markup=keyboard)
+
 @Client.on_message(filters.command('settings'))
 async def settings(client, message):
     userid = message.from_user.id if message.from_user else None
@@ -846,10 +1218,5 @@ async def send_chatmsg(bot, message):
             await message.reply_text("<b>Aɴ Eʀʀᴏʀ Oᴄᴄᴜʀʀᴇᴅ !</b>")
     else:
         await message.reply_text("<b>Cᴏᴍᴍᴀɴᴅ Iɴᴄᴏᴍᴘʟᴇᴛᴇ...</b>")
-
-
-
-
-
-
-
+        
+        
