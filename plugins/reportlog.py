@@ -10,7 +10,7 @@ user_log_times = {}
 
 # Command handler for setting log time
 @Client.on_message(filters.command("setlogtime") & filters.user(ADMINS))
-async def set_log_time(_, message: Message):  # Change 'client' to '_' to ignore the unused parameter
+async def set_log_time(client, message: Message):  # Change 'client' to '_' to ignore the unused parameter
     try:
         chat_id = message.chat.id
         user_id = message.from_user.id
