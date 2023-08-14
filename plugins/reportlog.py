@@ -1,9 +1,8 @@
-from pyrogram import filters
-from pyrogram.types import Message
+from pyrogram import Client, filters
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import datetime
 import asyncio
 from database.users_chats_db import db
- 
 from info import ADMINS, LOG_CHANNEL
 
 # Dictionary to store users' set log times
@@ -11,7 +10,7 @@ user_log_times = {}
 
 # Command handler for setting log time
 @Client.on_message(filters.command("setlogtime") & filters.user(ADMINS))
-async def set_log_time(client, message: Message):  # Change 'client' to '_' to ignore the unused parameter
+async def set_log_time(_, message: Message):  # Change 'client' to '_' to ignore the unused parameter
     try:
         chat_id = message.chat.id
         user_id = message.from_user.id
@@ -41,13 +40,24 @@ async def send_log():
         for user_id, log_time in user_log_times.items():
             if current_time.hour == log_time[0] and current_time.minute == log_time[1]:
                 # Replace with your logic to fetch and format the log
-                log_text = f"Log Send...\nDate/Time: {current_time}\nTotal Users: {total_users}\nTotal Chats: {total_chat}"
-                await bot.send_message(LOG_CHANNEL, log_text)  # Use 'app' instead of 'bot'
+                log_text = f"Log Sent...\nDate/Time: {current_time}\nTotal Users: {total_users}\nTotal Chats: {total_chat}"
+                keyboard = InlineKeyboardMarkup([
+                    [InlineKeyboardButton("Set Same Time Again", callback_data=f"set_time_{log_time[0]}_{log_time[1]}"),
+                     InlineKeyboardButton("Stop", callback_data="stop")]
+                ])
+                await bot.send_message(LOG_CHANNEL, log_text, reply_markup=keyboard)  # Use 'app' instead of 'bot'
 
         await asyncio.sleep(60)  # Check every minute
 
-# Start the log sending loop
-@Client.on_startup
-async def start_log_sender(_):
-    await asyncio.create_task(send_log())
-    
+# Callback query handler
+@Client.on_callback_query()
+async def callback_query_handler(_, query):
+    user_id = query.from_user.id
+    if query.data == "stop":
+        if user_id in user_log_times:
+            del user_log_times[user_id]
+            await query.message.edit_text("Log sending stopped.")
+    elif query.data.startswith("set_time_"):
+        _, hours, minutes = query.data.split("_")
+        user_log_times[user_id] = (int(hours), int(minutes))
+        await query.message.edit_text(f"Log time set to {hours:02d}:{minutes:02d}.")
