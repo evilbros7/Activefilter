@@ -111,8 +111,8 @@ async def start(client, message):
                     InlineKeyboardButton("📊 𝚂𝚃𝙰𝚃𝚄𝚂 📊", callback_data="bot_status")
                 ],
                 [
-                    InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="help"),
-                    InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="about")
+                    InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="stats"),
+                    InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="admin")
                 ],
                 [
                     InlineKeyboardButton('🔒 𝙰𝙳𝙼𝙸𝙽 𝚂𝙴𝚃𝚃𝙸𝙽𝙶𝚂 🔒', callback_data='admin_settings')
@@ -194,8 +194,8 @@ async def start(client, message):
                     InlineKeyboardButton("📊 𝚂𝚃𝙰𝚃𝚄𝚂 📊", callback_data="bot_status")
                 ],
                 [
-                    InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="help"),
-                    InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="about")
+                    InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="stats"),
+                    InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="admin")
                 ],
                 [
                     InlineKeyboardButton('🔒 𝙰𝙳𝙼𝙸𝙽 𝚂𝙴𝚃𝚃𝙸𝙽𝙶𝚂 🔒', callback_data='admin_settings')
