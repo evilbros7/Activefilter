@@ -22,14 +22,31 @@ BATCH_FILES = {}
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
+    # Check if the user is an admin
+    is_admin = message.from_user and message.from_user.id in ADMINS
+    
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        buttons = [[           
-            InlineKeyboardButton('📢 𝚄𝙿𝙳𝙰𝚃𝙴𝚂 📢', url=f'https://t.me/{SUPPORT_CHAT}')
-            ],[
-            InlineKeyboardButton('ℹ️ 𝙷𝙴𝙻𝙿 ℹ️', url=f"https://t.me/{temp.U_NAME}?start=help")
-            ]]
-        await message.reply(START_MESSAGE.format(user=message.from_user.mention if message.from_user else message.chat.title, bot=temp.B_LINK), reply_markup=InlineKeyboardMarkup(buttons), disable_web_page_preview=True)                    
-        await asyncio.sleep(2) 
+        if is_admin:
+            # If the user is an admin, show admin-specific buttons
+            admin_buttons = [
+                [
+                    InlineKeyboardButton('Support Group', url=f'https://t.me/{SUPPORT_CHAT}'),
+                    InlineKeyboardButton('More Bots', url=f'https://t.me/iPepkornBots/8')
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(admin_buttons)
+        else:
+            # If the user is not an admin, show regular buttons
+            users_buttons = [
+                [
+                    InlineKeyboardButton('Support Group', url=f'https://t.me/{SUPPORT_CHAT}'),
+                    InlineKeyboardButton('More Bots', url=f'https://t.me/iPepkornBots/8')
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(users_buttons)
+
+        await message.reply(START_MESSAGE.format(user=message.from_user.mention if message.from_user else message.chat.title, bot=temp.B_LINK), reply_markup=reply_markup)
+        await asyncio.sleep(2)
         if not await db.get_chat(message.chat.id):
             total = await client.get_chat_members_count(message.chat.id)
             total_chat = await db.total_chat_count() + 1  # Increment total_chat by 1
