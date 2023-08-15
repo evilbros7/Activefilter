@@ -861,7 +861,10 @@ async def handle_find_files(client, message):
                 ]
             ]
         )
-        await message.reply_text('✨ Please select an option:', reply_markup=keyboard)
+        await message.reply_text(confirmation_message, reply_markup=keyboard)
+    else:
+        await message.reply('❌ No files found matching the search query.', quote=True)
+        
 
 
 @Client.on_callback_query(filters.regex('^related_files'))
