@@ -821,21 +821,26 @@ async def delete_file_type_cancel_callback(bot, callback_query):
     await callback_query.message.edit_text("Delete file type operation canceled.")
     await callback_query.answer()
     
-@Client.on_message(filters.command(['managefiles']) & filters.user(ADMINS))
+@Client.on_message(filters.command(['findfiles']) & filters.user(ADMINS))
 async def manage_files(client, message):
     """Manage files in the database based on search criteria"""
     keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("🌟 Find Files", callback_data="manage:find"),
-                InlineKeyboardButton("🗑️ Delete Files", callback_data="manage:delete")
+                InlineKeyboardButton("🌟 Find Related", callback_data="related_files:1"),
+                InlineKeyboardButton("🌟 Find Starting", callback_data="starting_files:1")
+            ],
+            [
+                InlineKeyboardButton("🗑️ Delete Related", callback_data="delete_related"),
+                InlineKeyboardButton("🗑️ Delete Starting", callback_data="delete_starting")
             ],
             [
                 InlineKeyboardButton("❌ Cancel", callback_data="manage:cancel")
             ]
         ]
     )
-    await message.reply_text('✨ Please select the option:', reply_markup=keyboard)
+    await message.reply_text('✨ Please select an option:', reply_markup=keyboard)
+    
 
 async def handle_find_files(client, message):
     """Find files in the database based on search criteria"""
@@ -888,16 +893,6 @@ async def handle_delete_files(client, message):
         await message.reply_text(f'😎 No files found with the name "{file_name}" in the database')
 
 
-@Client.on_callback_query(filters.regex('^manage'))
-async def handle_manage_buttons(client, callback_query):
-    action = callback_query.data.split(":", 1)[1]
-    
-    if action == 'find':
-        await handle_find_files(client, callback_query.message)
-    elif action == 'delete':
-        await handle_delete_files(client, callback_query.message)
-    elif action == 'cancel':
-        await callback_query.message.delete()
 
 @Client.on_callback_query(filters.regex('^related_files'))
 async def find_related_files(client, callback_query):
