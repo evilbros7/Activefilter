@@ -15,7 +15,6 @@ from database.ia_filterdb import Media, get_file_details, get_search_results, ge
 from database.filters_mdb import del_all, find_filter, get_filters
 from database.gfilters_mdb import find_gfilter, get_gfilters
 from plugins.helper.admin_check import admin_fliter
-from datetime import date, datetime, timedelta
 
 # image editor tools
 from image.edit_1 import bright, mix, black_white, g_blur, normal_blur, box_blur
@@ -334,166 +333,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             protect_content=True if ident == 'checksubp' else False
         )
 
-    elif callback_data == "report_yesterday":
-        # Calculate the start and end dates for yesterday
-        yesterday = date.today() - timedelta(days=1)
-        start_date = yesterday
-        end_date = yesterday
-
-        current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
-        total_users = await db.daily_users_count(current_datetime)
-        total_chats = await db.daily_chats_count(current_datetime)
-
-        report = "Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-        report += f"Users: {total_users}, Chats: {total_chats}\n"
-
-        # Send the report as a reply
-        await callback_query.answer(report)
-
-    elif callback_data == "report_last_7_days":
-        # Calculate the start and end dates for the past 7 days
-        today = date.today()
-        past_days = 7
-        start_date = today - timedelta(days=past_days-1)
-        end_date = today
-
-        report = "Last 7 Days' Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-
-        results_per_page = 7
-        page = 1
-        total_pages = (past_days + results_per_page - 1) // results_per_page
-
-        for i in range((page - 1) * results_per_page, min(page * results_per_page, past_days)):
-            current_date = start_date + timedelta(days=i)
-            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
-            current_date_str = current_datetime.strftime('%d %B, %Y')
-            total_users = await db.daily_users_count(current_datetime)
-            total_chats = await db.daily_chats_count(current_datetime)
-            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-
-        # Add pagination buttons if there are more pages
-        if page < total_pages:
-            buttons.append([InlineKeyboardButton("Next Page", callback_data=f"report_last_7_days_{page+1}")])
-
-        # Add the buttons to the reply markup
-        reply_markup = InlineKeyboardMarkup(buttons)
-
-        # Send the report as a reply
-        await callback_query.answer(report, reply_markup=reply_markup)
-
-    elif callback_data.startswith("report_last_7_days_"):
-        # Extract the page number from the callback_data
-        page = int(callback_data.split("_")[-1])
-
-        # Calculate the start and end dates for the past 7 days
-        today = date.today()
-        past_days = 7
-        start_date = today - timedelta(days=past_days-1)
-        end_date = today
-
-        report = f"Last 7 Days' Report (Page {page}):\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-
-        results_per_page = 7
-        total_pages = (past_days + results_per_page - 1) // results_per_page
-
-        for i in range((page - 1) * results_per_page, min(page * results_per_page, past_days)):
-            current_date = start_date + timedelta(days=i)
-            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
-            current_date_str = current_datetime.strftime('%d %B, %Y')
-            total_users = await db.daily_users_count(current_datetime)
-            total_chats = await db.daily_chats_count(current_datetime)
-            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-
-        # Add pagination buttons if there are more pages
-        if page < total_pages:
-            buttons.append([InlineKeyboardButton("Next Page", callback_data=f"report_last_7_days_{page+1}")])
-
-        # Add the buttons to the reply markup
-        reply_markup = InlineKeyboardMarkup(buttons)
-
-        # Send the report as a reply
-        await callback_query.answer(report, reply_markup=reply_markup)
-
-    elif callback_data == "report_last_30_days":
-        # Calculate the start and end dates for the past 30 days
-        today = date.today()
-        past_days = 30
-        start_date = today - timedelta(days=past_days-1)
-        end_date = today
-
-        report = "Last 30 Days' Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-
-        results_per_page = 7
-        page = 1
-        total_pages = (past_days + results_per_page - 1) // results_per_page
-
-        for i in range((page - 1) * results_per_page, min(page * results_per_page, past_days)):
-            current_date = start_date + timedelta(days=i)
-            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
-            current_date_str = current_datetime.strftime('%d %B, %Y')
-            total_users = await db.daily_users_count(current_datetime)
-            total_chats = await db.daily_chats_count(current_datetime)
-            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-
-        # Add pagination buttons if there are more pages
-        if page < total_pages:
-            buttons.append([InlineKeyboardButton("Next Page", callback_data=f"report_last_30_days_{page+1}")])
-
-        # Add the buttons to the reply markup
-        reply_markup = InlineKeyboardMarkup(buttons)
-
-        # Send the report as a reply
-        await callback_query.answer(report, reply_markup=reply_markup)
-
-    elif callback_data.startswith("report_last_30_days_"):
-        # Extract the page number from the callback_data
-        page = int(callback_data.split("_")[-1])
-
-        # Calculate the start and end dates for the past 30 days
-        today = date.today()
-        past_days = 30
-        start_date = today - timedelta(days=past_days-1)
-        end_date = today
-
-        report = f"Last 30 Days' Report (Page {page}):\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-
-        results_per_page = 7
-        total_pages = (past_days + results_per_page - 1) // results_per_page
-
-        for i in range((page - 1) * results_per_page, min(page * results_per_page, past_days)):
-            current_date = start_date + timedelta(days=i)
-            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
-            current_date_str = current_datetime.strftime('%d %B, %Y')
-            total_users = await db.daily_users_count(current_datetime)
-            total_chats = await db.daily_chats_count(current_datetime)
-            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-
-        # Add pagination buttons if there are more pages
-        if page < total_pages:
-            buttons.append([InlineKeyboardButton("Next Page", callback_data=f"report_last_30_days_{page+1}")])
-
-        # Add the buttons to the reply markup
-        reply_markup = InlineKeyboardMarkup(buttons)
-
-        # Send the report as a reply
-        await callback_query.answer(report, reply_markup=reply_markup)
-
-    elif callback_data == "report_this_year":
-        # Calculate the start and end dates for this year
-        today = date.today()
-        start_date = date(today.year, 1, 1)
-        end_date = today
-
-        report = "This Year's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-
-        current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
-        total_users = await db.daily_users_count(current_datetime)
-        total_chats = await db.daily_chats_count(current_datetime)
-        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-
-        # Send the report as a reply
-        await callback_query.answer(report)
-        
 
     elif query.data == "removebg":
         await query.message.edit_text("**Select required mode**",
@@ -690,7 +529,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton("➕️ 𝙰𝙳𝙳 𝙼𝙴 𝚃𝙾 𝚈𝙾𝚄𝚁 𝙶𝚁𝙾𝚄𝙿 ➕️", url=f"http://t.me/{temp.U_NAME}?startgroup=true")
             ],[
             InlineKeyboardButton("🔍 𝚂𝙴𝙰𝚁𝙲𝙷 🔍", switch_inline_query_current_chat=''), 
-            InlineKeyboardButton("📢 𝚄𝙿𝙳𝙰𝚃𝙴𝚂 📢", url="https://t.me/iPapkornUpdate")
+            InlineKeyboardButton("📢 𝚄𝙿𝙳𝙰𝚃𝙴𝚂 📢", url="https://t.me/mkn_bots_updates")
             ],[
             InlineKeyboardButton("ℹ️ 𝙷𝙴𝙻𝙿 ℹ️", callback_data="help"),
             InlineKeyboardButton("💫 𝙰𝙱𝙾𝚄𝚃 💫", callback_data="about")
@@ -730,58 +569,58 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,           
         )
     elif query.data == "help":
-        buttons = [
-            [
-                InlineKeyboardButton('Filters', callback_data='filters'),
-                InlineKeyboardButton('File Store', callback_data='store_file')
-            ],
-            [
-                InlineKeyboardButton('Connection', callback_data='coct'),
-                InlineKeyboardButton('Extra Mods', callback_data='extra')
-            ],
-            [
-                InlineKeyboardButton('Home', callback_data='start'),
-                InlineKeyboardButton('Status', callback_data='stats')
-            ]
-        ]
-            
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto(random.choice(PICS))
+        buttons = [[
+            InlineKeyboardButton('⚙️ 𝙰𝙳𝙼𝙸𝙽 𝙿𝙰𝙽𝙴𝙻 ⚙️', callback_data='admin')            
+            ],[
+            InlineKeyboardButton('𝙼𝙰𝙽𝚄𝙴𝙻 𝙵𝙸𝙻𝚃𝙴𝚁', callback_data='manuelfilter'),
+            InlineKeyboardButton('𝙰𝚄𝚃𝙾 𝙵𝙸𝙻𝚃𝙴𝚁', callback_data='autofilter'),
+            InlineKeyboardButton('𝙲𝙾𝙽𝙽𝙴𝙲𝚃𝙸𝙾𝙽𝚂', callback_data='coct')
+            ],[                       
+            InlineKeyboardButton('𝚃𝙴𝙻𝙴𝙶𝚁𝙰𝙿𝙷', callback_data='tele'),
+            InlineKeyboardButton('𝚂𝙷𝙰𝚁𝙴-𝚃𝙴𝚇𝚃', callback_data='sharetxt'),
+            InlineKeyboardButton('𝙵𝙸𝙻𝙴-𝚂𝚃𝙾𝚁𝙴', callback_data='newdata')
+            ],[           
+            InlineKeyboardButton('𝙹𝚂𝙾𝙽𝙴', callback_data='son'),
+            InlineKeyboardButton('𝚃𝚃𝚂', callback_data='ttss'),           
+            InlineKeyboardButton('𝙿𝚄𝚁𝙶𝙴', callback_data='purges')
+            ],[
+            InlineKeyboardButton('𝙿𝙰𝚂𝚃𝙴', callback_data='pastes'),
+            InlineKeyboardButton("𝙸𝙼𝙰𝙶𝙴", callback_data='image'),
+            InlineKeyboardButton('𝙿𝙸𝙽𝙶', callback_data='pings')                                   
+            ],[                               
+            InlineKeyboardButton('𝙼𝚄𝚃𝙴', callback_data='restric'),
+            InlineKeyboardButton('𝙺𝙸𝙲𝙺', callback_data='zombies'),
+            InlineKeyboardButton('𝙿𝙸𝙽', callback_data='pin')
+            ],[
+            InlineKeyboardButton('𝙲𝙰𝚁𝙱𝙾𝙽', callback_data='carb'),
+            InlineKeyboardButton('𝙵𝙾𝙽𝙳', callback_data='fond'),
+            InlineKeyboardButton('𝚈𝚃-𝙳𝙻', callback_data='ytdl')
+            ],[
+            InlineKeyboardButton('🔮 𝚂𝚃𝙰𝚃𝚄𝚂 🔮', callback_data='stats')
+            ],[
+            InlineKeyboardButton('🚫 𝙲𝙻𝙾𝚂𝙴', callback_data='close_data'),
+            InlineKeyboardButton('🏠 𝙷𝙾𝙼𝙴 🏠', callback_data='start')           
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)             
+        await query.edit_message_media(  
+            InputMediaPhoto(random.choice(PICS), script.EXTRAMOD_TXT, enums.ParseMode.HTML),
+            reply_markup=reply_markup,           
         )
-        await query.message.edit_text(
-            text=script.HELP_TXT.format(query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        
     elif query.data == "about":
-        buttons = [
-            [
-                InlineKeyboardButton('Support Group', url=GRP_LNK),
-                InlineKeyboardButton('Source Code', callback_data='source')
-            ],
-            [
-                InlineKeyboardButton('Home', callback_data='start'),
-                InlineKeyboardButton('Close', callback_data='close_data')
-            ]
-        ]
-        await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto(random.choice(PICS))
-        )
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.ABOUT_TXT.format(temp.B_NAME),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        buttons= [[
+            InlineKeyboardButton('❣️ 𝚂𝙾𝚄𝚁𝙲𝙴 𝙲𝙾𝙳𝙴 ❣️', callback_data='source')
+            ],[
+            InlineKeyboardButton('🏠 𝙷𝙾𝙼𝙴 🏠', callback_data='start'),
+            InlineKeyboardButton('🔐 𝙲𝙻𝙾𝚂𝙴 🔐', callback_data='close_data')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)        
+        await query.edit_message_media(
+            InputMediaPhoto(random.choice(PICS), script.ABOUT_TXT.format(temp.B_NAME), enums.ParseMode.HTML),
+            reply_markup=reply_markup,           
         )
     elif query.data == "source":
         buttons = [[
-            InlineKeyboardButton('SOURCE CODE', url='https://t.me/iPapkornUpdate')
+            InlineKeyboardButton('SOURCE CODE', url='https://github.com/MrMKN/PROFESSOR-BOT')
             ],[
             InlineKeyboardButton('👩‍🦯 Back', callback_data='about')
         ]]
@@ -1059,10 +898,4 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]]
             reply_markup = InlineKeyboardMarkup(buttons)
             await query.message.edit_reply_markup(reply_markup)
-
-
-
-
-
-
-
+            
