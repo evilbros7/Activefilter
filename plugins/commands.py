@@ -33,6 +33,7 @@ import base64
 logger = logging.getLogger(__name__)
 
 BATCH_FILES = {}
+RESULTS_PER_PAGE = 5  # Replace with desired results per page
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
@@ -492,127 +493,6 @@ async def delete_all_index_confirm(bot, message):
     await message.answer('Piracy Is Crime')
     await message.message.edit('Succesfully Deleted All The Indexed Files.')
 
-@Client.on_message(filters.command('findfiles') & filters.user(ADMINS))
-async def find_files(client, message):
-    """Find files in the database based on search criteria"""
-    search_query = " ".join(message.command[1:])  # Extract the search query from the command
-
-    if not search_query:
-        return await message.reply('✨ Please provide a name.\n\nExample: /findfiles Kantara.', quote=True)
-
-    # Build the MongoDB query to search for files
-    query = {
-        'file_name': {"$regex": f".*{re.escape(search_query)}.*", "$options": "i"}
-    }
-
-    # Fetch the matching files from the database
-    results = await Media.collection.find(query).to_list(length=None)
-
-    if len(results) > 0:
-        confirmation_message = f'✨ {len(results)} files found matching the search query "{search_query}" in the database:\n\n'
-        starting_query = {
-            'file_name': {"$regex": f"^{re.escape(search_query)}", "$options": "i"}
-        }
-        starting_results = await Media.collection.find(starting_query).to_list(length=None)
-        confirmation_message += f'✨ {len(starting_results)} files found starting with "{search_query}" in the database.\n\n'
-        confirmation_message += '✨ Please select the option for easier searching:'
-        
-        keyboard = InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton("🌟 Find Related Name Files", callback_data=f"related_files:1:{search_query}")
-                ],
-                [
-                    InlineKeyboardButton("🌟 Find Starting Name Files", callback_data=f"starting_files:1:{search_query}")
-                ],
-                [
-                    InlineKeyboardButton("❌ Cancel", callback_data="cancel")
-                ]
-            ]
-        )
-
-        await message.reply_text(confirmation_message, reply_markup=keyboard)
-    else:
-        await message.reply_text(f'😎 No files found matching the search query "{search_query}" in the database')
-
-@Client.on_callback_query(filters.regex('^related_files'))
-async def find_related_files(client, callback_query):
-    data = callback_query.data.split(":")
-    page = int(data[1])
-    search_query = data[2]
-    query = {
-        'file_name': {"$regex": f".*{re.escape(search_query)}.*", "$options": "i"}
-    }
-    results = await Media.collection.find(query).to_list(length=None)
-
-    total_results = len(results)
-    num_pages = total_results // RESULTS_PER_PAGE + 1
-
-    start_index = (page - 1) * RESULTS_PER_PAGE
-    end_index = start_index + RESULTS_PER_PAGE
-    current_results = results[start_index:end_index]
-
-    result_message = f'{len(current_results)} files found with related names to "{search_query}" in the database:\n\n'
-    for result in current_results:
-        result_message += f'File Name: {result["file_name"]}\n'
-        result_message += f'File Size: {result["file_size"]}\n\n'
-
-    buttons = []
-
-    if page > 1:
-        buttons.append(InlineKeyboardButton("⬅️ Back", callback_data=f"related_files:{page-1}:{search_query}"))
-
-    if page < num_pages:
-        buttons.append(InlineKeyboardButton("Next ➡️", callback_data=f"related_files:{page+1}:{search_query}"))
-
-    buttons.append(InlineKeyboardButton("🔚 Cancel", callback_data=f"cancel_find"))
-
-    # Create button groups with two buttons each
-    button_groups = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
-    keyboard = InlineKeyboardMarkup(button_groups)
-
-    await callback_query.message.edit_text(result_message, reply_markup=keyboard)
-    await callback_query.answer()
-
-@Client.on_callback_query(filters.regex('^starting_files'))
-async def find_starting_files(client, callback_query):
-    data = callback_query.data.split(":")
-    page = int(data[1])
-    search_query = data[2]
-    query = {
-        'file_name': {"$regex": f"^{re.escape(search_query)}", "$options": "i"}
-    }
-    results = await Media.collection.find(query).to_list(length=None)
-
-    total_results = len(results)
-    num_pages = total_results // RESULTS_PER_PAGE + 1
-
-    start_index = (page - 1) * RESULTS_PER_PAGE
-    end_index = start_index + RESULTS_PER_PAGE
-    current_results = results[start_index:end_index]
-
-    result_message = f'{len(current_results)} files found with names starting "{search_query}" in the database:\n\n'
-    for result in current_results:
-        result_message += f'File Name: {result["file_name"]}\n'
-        result_message += f'File Size: {result["file_size"]}\n\n'
-
-    buttons = []
-
-    if page > 1:
-        buttons.append(InlineKeyboardButton("⬅️ Back", callback_data=f"related_files:{page-1}:{search_query}"))
-
-    if page < num_pages:
-        buttons.append(InlineKeyboardButton("Next ➡️", callback_data=f"related_files:{page+1}:{search_query}"))
-
-    buttons.append(InlineKeyboardButton("🔚 Cancel", callback_data=f"cancel_find"))
-
-    # Create button groups with two buttons each
-    button_groups = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
-    keyboard = InlineKeyboardMarkup(button_groups)
-
-    await callback_query.message.edit_text(result_message, reply_markup=keyboard)
-    await callback_query.answer()
-
 
 @Client.on_message(filters.command("findzip") & filters.user(ADMINS))
 async def find_zip_command(bot, message):
@@ -941,9 +821,48 @@ async def delete_file_type_cancel_callback(bot, callback_query):
     await callback_query.message.edit_text("Delete file type operation canceled.")
     await callback_query.answer()
     
-    
-@Client.on_message(filters.command('deletefiles') & filters.user("ADMINS"))
-async def delete_files(client, message):
+@Client.on_message(filters.command(['managefiles']) & filters.user(ADMINS))
+async def manage_files(client, message):
+    """Manage files in the database based on search criteria"""
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("🌟 Find Files", callback_data="manage:find"),
+                InlineKeyboardButton("🗑️ Delete Files", callback_data="manage:delete")
+            ],
+            [
+                InlineKeyboardButton("❌ Cancel", callback_data="manage:cancel")
+            ]
+        ]
+    )
+    await message.reply_text('✨ Please select the option:', reply_markup=keyboard)
+
+async def handle_find_files(client, message):
+    """Find files in the database based on search criteria"""
+    search_query = " ".join(message.command[1:])  # Extract the search query from the command
+
+    if not search_query:
+        return await message.reply('✨ Please provide a name.\n\nExample: /findfiles Kantara.', quote=True)
+
+    # Build the MongoDB query to search for files
+    query = {
+        'file_name': {"$regex": f".*{re.escape(search_query)}.*", "$options": "i"}
+    }
+
+    # Fetch the matching files from the database
+    results = await Media.collection.find(query).to_list(length=None)
+
+    if len(results) > 0:
+        confirmation_message = f'✨ {len(results)} files found matching the search query "{search_query}" in the database:\n\n'
+        starting_query = {
+            'file_name': {"$regex": f"^{re.escape(search_query)}", "$options": "i"}
+        }
+        starting_results = await Media.collection.find(starting_query).to_list(length=None)
+        confirmation_message += f'✨ {len(starting_results)} files found starting with "{search_query}" in the database.\n\n'
+        confirmation_message += '✨ Please select the option for easier searching:'
+ 
+
+async def handle_delete_files(client, message):
     if len(message.command) == 1:
         await message.reply_text("🤨 Please provide a file name to delete.\n\nExample: /deletename Kantara")
         return
@@ -955,19 +874,7 @@ async def delete_files(client, message):
     })
 
     if result > 0:
-        keyboard = InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton("🌟 Delete all related name files", callback_data=f"confirm_delete_related:{file_name}")
-                ],
-                [
-                    InlineKeyboardButton("🌟 Delete all starting name files", callback_data=f"confirm_delete_starting:{file_name}")
-                ],
-                [
-                    InlineKeyboardButton("🔚 Cancel", callback_data="cancel_delete")
-                ]
-            ]
-        )
+        
 
         confirmation_message = f'✨ {result} files found with the name "{file_name}" in the database.\n\n'
         starting_result = await Media.collection.count_documents({
@@ -979,6 +886,97 @@ async def delete_files(client, message):
         await message.reply_text(confirmation_message, reply_markup=keyboard)
     else:
         await message.reply_text(f'😎 No files found with the name "{file_name}" in the database')
+
+
+@Client.on_callback_query(filters.regex('^manage'))
+async def handle_manage_buttons(client, callback_query):
+    action = callback_query.data.split(":", 1)[1]
+    
+    if action == 'find':
+        await handle_find_files(client, callback_query.message)
+    elif action == 'delete':
+        await handle_delete_files(client, callback_query.message)
+    elif action == 'cancel':
+        await callback_query.message.delete()
+
+@Client.on_callback_query(filters.regex('^related_files'))
+async def find_related_files(client, callback_query):
+    data = callback_query.data.split(":")
+    page = int(data[1])
+    search_query = data[2]
+    query = {
+        'file_name': {"$regex": f".*{re.escape(search_query)}.*", "$options": "i"}
+    }
+    results = await Media.collection.find(query).to_list(length=None)
+
+    total_results = len(results)
+    num_pages = total_results // RESULTS_PER_PAGE + 1
+
+    start_index = (page - 1) * RESULTS_PER_PAGE
+    end_index = start_index + RESULTS_PER_PAGE
+    current_results = results[start_index:end_index]
+
+    result_message = f'{len(current_results)} files found with related names to "{search_query}" in the database:\n\n'
+    for result in current_results:
+        result_message += f'File Name: {result["file_name"]}\n'
+        result_message += f'File Size: {result["file_size"]}\n\n'
+
+    buttons = []
+
+    if page > 1:
+        buttons.append(InlineKeyboardButton("⬅️ Back", callback_data=f"related_files:{page-1}:{search_query}"))
+
+    if page < num_pages:
+        buttons.append(InlineKeyboardButton("Next ➡️", callback_data=f"related_files:{page+1}:{search_query}"))
+
+    buttons.append(InlineKeyboardButton("🔚 Cancel", callback_data=f"cancel_find"))
+
+    # Create button groups with two buttons each
+    button_groups = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
+    keyboard = InlineKeyboardMarkup(button_groups)
+
+    await callback_query.message.edit_text(result_message, reply_markup=keyboard)
+    await callback_query.answer()
+
+
+@Client.on_callback_query(filters.regex('^starting_files'))
+async def find_starting_files(client, callback_query):
+    data = callback_query.data.split(":")
+    page = int(data[1])
+    search_query = data[2]
+    query = {
+        'file_name': {"$regex": f"^{re.escape(search_query)}", "$options": "i"}
+    }
+    results = await Media.collection.find(query).to_list(length=None)
+
+    total_results = len(results)
+    num_pages = total_results // RESULTS_PER_PAGE + 1
+
+    start_index = (page - 1) * RESULTS_PER_PAGE
+    end_index = start_index + RESULTS_PER_PAGE
+    current_results = results[start_index:end_index]
+
+    result_message = f'{len(current_results)} files found with names starting "{search_query}" in the database:\n\n'
+    for result in current_results:
+        result_message += f'File Name: {result["file_name"]}\n'
+        result_message += f'File Size: {result["file_size"]}\n\n'
+
+    buttons = []
+
+    if page > 1:
+        buttons.append(InlineKeyboardButton("⬅️ Back", callback_data=f"related_files:{page-1}:{search_query}"))
+
+    if page < num_pages:
+        buttons.append(InlineKeyboardButton("Next ➡️", callback_data=f"related_files:{page+1}:{search_query}"))
+
+    buttons.append(InlineKeyboardButton("🔚 Cancel", callback_data=f"cancel_find"))
+
+    # Create button groups with two buttons each
+    button_groups = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
+    keyboard = InlineKeyboardMarkup(button_groups)
+
+    await callback_query.message.edit_text(result_message, reply_markup=keyboard)
+    await callback_query.answer()
 
 @Client.on_callback_query(filters.regex('^confirm_delete_related'))
 async def confirm_delete_related_files(client, callback_query):
@@ -999,6 +997,7 @@ async def confirm_delete_related_files(client, callback_query):
     )
 
     await callback_query.message.edit_text(confirmation_message, reply_markup=keyboard)
+
 
 
 @Client.on_callback_query(filters.regex('^confirm_delete_starting'))
@@ -1094,6 +1093,7 @@ async def delete_starting_files(client, callback_query):
         )
 
     await callback_query.message.edit_text(message_text, reply_markup=keyboard)
+    
 
 @Client.on_message(filters.command('settings'))
 async def settings(client, message):
